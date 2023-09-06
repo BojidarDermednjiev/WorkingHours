@@ -124,7 +124,7 @@ export default function DisplayWorkingDays({
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mx-5 mt-10">
         <div onClick={() => changeMonth(-1)}>Предишен месец</div>
         <div onClick={() => changeMonth(1)}>Следващ месец</div>
       </div>
@@ -154,12 +154,12 @@ export default function DisplayWorkingDays({
                 }}
                 className={`text-center border border-r border-gray-300 ${
                   data.weekOfTheDay == "Saturday" || data.weekOfTheDay == "Sunday"
-                    ? "bg-blue-500"
+                    ? "bg-sky-100"
                     : "bg-gray-100"
                 }`}
               >
                 <h2>{data.day}</h2>
-                <h3>{data.text.slice(0,1)}</h3>
+                <h3 className={`${data.text == "Почива" ? "text-green-500": "text-red-500"} font-bold`}>{data.text.slice(0,4)}</h3>
               </div>
             );
           } catch (e) {
