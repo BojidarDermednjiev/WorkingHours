@@ -1,13 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 
-import { months } from "./data";
+import { dateFormatDay, days, months } from "./data";
+import { getDaysInMonth, isObjectEmpty } from "../../utils/helpers";
 
-function getDaysInMonth(year, month) {
-  return Array.apply(null, Array(new Date(year, month, 0).getDate()));
-}
-const isObjectEmpty = (objectName) => {
-  return Object.keys(objectName).length === 0;
-};
 export default function DisplayWorkingDays({
   monthIndex,
   currentYear,
@@ -19,8 +14,6 @@ export default function DisplayWorkingDays({
   workingDay,
   setWorkingDay,
 }) {
-  let doesSkip = false;
-
   const currMonthDisplay = months[date.getMonth() + monthIndex - 1];
   const daysInCurrentMonth = getDaysInMonth(currentYear, currMonth);
 
@@ -29,12 +22,15 @@ export default function DisplayWorkingDays({
       const arr = [];
 
       for (let i = 0; i < daysInCurrentMonth.length; i++) {
+        const dayDate = new Date(currentYear, currMonth - 1, i + 1).getDay();
+
         // Setting up data for display
+
         const data = {
           text: "",
           day: i + 1,
+          weekOfTheDay: dateFormatDay[dayDate],
         };
-
         // Prev date
         const prevDay = arr[arr.length - 1];
 
@@ -113,13 +109,39 @@ export default function DisplayWorkingDays({
       console.log(e);
     }
   }, [monthIndex, workingDay]);
+
+  if(!displayWorkingDays[monthIndex]?.days[0]){
+    return <div>Loading...</div>
+  }
+  const emptyDivs = Array?.apply(
+    null,
+    Array(
+      days?.indexOf(
+        displayWorkingDays[monthIndex]?.days[0]?.weekOfTheDay 
+      )
+    )
+  );
+
   return (
     <>
       <div className="flex items-center justify-between">
         <div onClick={() => changeMonth(-1)}>Предишен месец</div>
         <div onClick={() => changeMonth(1)}>Следващ месец</div>
       </div>
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 mt-5">
+        {days.map((day) => {
+          return (
+            <div
+              key={day}
+              className="flex items-center justify-center text-lg font-semibold border-r border-y border-slate-500"
+            >
+              {day.slice(0, 1)}
+            </div>
+          );
+        })}
+        {emptyDivs?.map((emptyDiv, index) => {
+          return <div key={index}></div>;
+        })}
         {displayWorkingDays[monthIndex]?.days?.map((data) => {
           try {
             return (
@@ -130,7 +152,11 @@ export default function DisplayWorkingDays({
                     month: months[date.getMonth() + monthIndex - 1],
                   });
                 }}
-                className="text-center"
+                className={`text-center border border-r border-gray-300 ${
+                  data.weekOfTheDay == "Saturday" || data.weekOfTheDay == "Sunday"
+                    ? "bg-blue-500"
+                    : "bg-gray-100"
+                }`}
               >
                 <h2>{data.day}</h2>
                 <h3>{data.text}</h3>
@@ -141,7 +167,7 @@ export default function DisplayWorkingDays({
           }
         })}
       </div>
-      <div className="flex mt-10 gap-x-10">
+      <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
         <div>
           <h2 className="text-lg font-bold">Working day:</h2>
           {workingDay.day}

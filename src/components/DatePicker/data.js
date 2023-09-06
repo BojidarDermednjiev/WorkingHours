@@ -12,3 +12,8 @@ export const months = [
     "November",
     "December",
   ];
+
+  export const days = [
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",  "Sunday"
+  ]
+  export const dateFormatDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
