@@ -159,7 +159,7 @@ export default function DisplayWorkingDays({
                 }`}
               >
                 <h2>{data.day}</h2>
-                <h3>{data.text}</h3>
+                <h3>{data.text.slice(0,1)}</h3>
               </div>
             );
           } catch (e) {
