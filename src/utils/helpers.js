@@ -1,5 +1,7 @@
 export function getDaysInMonth(year, month) {
-  return Array.apply(null, Array(new Date(year, month, 0).getDate()));
+  const date = new Date(year, month + 1, 0)
+  const array = Array(date.getDate())
+  return Array.apply(null, array);
 }
 export const isObjectEmpty = (objectName) => {
   return Object.keys(objectName).length === 0;

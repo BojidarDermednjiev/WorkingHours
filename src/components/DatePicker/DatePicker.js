@@ -1,42 +1,38 @@
-import { useEffect, useState } from "react";
 import DisplayWorkingDays from "./DisplayWorkingDays";
 import { getDaysInMonth, months } from "../../utils/helpers";
 import useDate from "../../hooks/useDate";
 
 function DatePicker() {
+  const [state, dispatch] = useDate();
 
+  const month = state.date.getMonth();
+  
+  const changeMonth = (num) => { 
 
-  const [state,dispatch,date] = useDate()
+    // Check if there is working day or month, no to be able to change for previous non-working month
 
-  const currMonth = date.getMonth() + state.monthIndex;
-
-
-  const changeMonth = (num) => {
-   
-    const action = {type: "change_month_index", payload: num}
+    // Change for next year
+    
+    const action = { type: "change_month_index", payload: num };
     dispatch(action);
   };
-  const currMonthDisplay = months[date.getMonth() + state.monthIndex - 1];
-  const daysInCurrentMonth = getDaysInMonth(state.currentYear, currMonth);
+  const currMonthDisplay = months[month];
+
+  const daysInCurrentMonth = getDaysInMonth(
+    state.date.getFullYear(),
+    month
+  );
 
   return (
     <DisplayWorkingDays
-
-    state={state}
-    dispatch={dispatch}
-    date={date}
-      currMonth={currMonth}
-      
+      state={state}
+      dispatch={dispatch}
       // Data
       daysInCurrentMonth={daysInCurrentMonth}
-
       // Displayers
       currMonthDisplay={currMonthDisplay}
-
       // Setters
       changeMonth={changeMonth}
-    
-
     />
   );
 }

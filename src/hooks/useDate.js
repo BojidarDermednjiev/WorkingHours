@@ -1,52 +1,54 @@
-import React, { useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 
 function reducer(state, action) {
   switch (action.type) {
     case "change_month_index":
-         // Change for next year
+      const newDate = new Date(state.date);
+      newDate.setMonth(newDate.getMonth() + action.payload);
 
-    // Check if there is working day or month, no to be able to change for previous non-working month
       return {
         ...state,
-        monthIndex: (state.monthIndex + action.payload),
+        date: newDate,
       };
     case "add_working_days":
+      const year = state.date.getFullYear();
+      const month = state.date.getMonth();
+      const cond =  `${year}_${month}`;
+
       return {
         ...state,
-        displayWorkingDays:{
-            ...state.displayWorkingDays,
-            [state.monthIndex]: {
-                days: action.payload,
-              },
-        }
-      
+        displayWorkingDays: {
+          ...state.displayWorkingDays,
+          [cond]: {
+            days: action.payload,
+          },
+        },
       };
-      case "set_working_day":
-        return{
-            ...state,
-            workingData:{
-                day: action.payload.day,
-                month: action.payload.month
 
-            }
-        }
+    case "set_working_day":
+      return {
+        ...state,
+        workingData: {
+          day: action.payload.day,
+          month: action.payload.month,
+          year: action.payload.year,
+        },
+      };
     default:
       return state;
   }
 }
 export default function useDate() {
-  const date = new Date();
-
   const [state, dispatch] = useReducer(reducer, {
-    currentYear: date.getFullYear(),
-    monthIndex: 1,
+    date: new Date(),
     perWorkDays: 2,
     displayWorkingDays: {},
     workingData: {
       day: null,
       month: null,
+      year: null,
     },
   });
 
-  return [state, dispatch, date];
+  return [state, dispatch];
 }

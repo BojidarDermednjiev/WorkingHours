@@ -6,12 +6,15 @@ import Day from "./Day";
 export default function DisplayWorkingDays({
   state,
   dispatch,
-  currMonth,
   daysInCurrentMonth,
   currMonthDisplay,
   changeMonth,
-date,
 }) {
+  const year = state.date.getFullYear();
+  const month = state.date.getMonth();
+  const cond = `${year}_${month}`;
+  const displayData = state.displayWorkingDays[cond];
+
   useMemo(() => {
     try {
       const arr = [];
@@ -21,8 +24,11 @@ date,
       let restDays = 0;
 
       for (let i = 0; i < daysInCurrentMonth.length; i++) {
-        const dayDate = new Date(state.currentYear, currMonth - 1, i + 1).getDay();
-
+        const dayDate = new Date(
+          state.date.getFullYear(),
+          month,
+          i + 1
+        ).getDay();
         // Setting up data for display
         const data = {
           isWorking: false,
@@ -38,16 +44,22 @@ date,
         }
 
         // !----- Next Month ------!
-        if (state.workingData.month != currMonthDisplay && i == 0) {
+        if (
+          (state.workingData.month < month || state.workingData.year < year) &&
+          i == 0
+        ) {
           /*
           Only days must be setup, and getted from last month. 
           Besides that the logic stays the same
           */
 
           // Getting prev Month data
-          console.log(state.monthIndex);
-          const prevMonth = state.displayWorkingDays[state.monthIndex - 1];
-
+          let prevMonth = state.displayWorkingDays[`${year}_${month - 1}`];
+          
+          // If is next year
+          if (state.workingData.year < year) {
+            prevMonth = state.displayWorkingDays[`${year - 1}_11`];
+          }
           // Last two days from last month
           const lastDays = prevMonth.days
             .slice(-state.perWorkDays)
@@ -105,7 +117,7 @@ date,
         // If working day is set
         if (
           state.workingData.day <= i + 1 &&
-          state.workingData?.month == currMonthDisplay
+          state.workingData?.month == month
         ) {
           data.isWorking = true;
           workingDays = state.perWorkDays - 1;
@@ -121,25 +133,22 @@ date,
       // This must be dispatch
       const action = {
         type: "add_working_days",
-        payload: arr
-
-      }
-      dispatch(action)
-     
+        payload: arr,
+      };
+      dispatch(action);
     } catch (e) {
       console.log(e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.monthIndex, state.workingData]);
+  }, [state.workingData, state.date]);
 
-  if (!state.displayWorkingDays[state.monthIndex]?.days[0]) {
+  if (!displayData?.days[0]) {
     return <div>Loading...</div>;
   }
   const emptyDivs = Array?.apply(
     null,
-    Array(days?.indexOf(state.displayWorkingDays[state.monthIndex]?.days[0]?.weekOfTheDay))
+    Array(days?.indexOf(displayData?.days[0]?.weekOfTheDay))
   );
-
   return (
     <>
       <div className="flex items-center justify-between mx-5 mt-10">
@@ -162,13 +171,13 @@ date,
         {emptyDivs?.map((emptyDiv, index) => {
           return <div key={index}></div>;
         })}
-        {state.displayWorkingDays[state.monthIndex]?.days?.map((data) => {
+        {displayData?.days?.map((data) => {
           return (
             <Day
               key={data.day}
               data={data}
-              date={date}
               state={state}
+              currMonth={month}
               monthIndex={state.monthIndex}
               dispatch={dispatch}
             />
@@ -176,7 +185,7 @@ date,
         })}
       </div>
 
-    {/* This way displaying for development purposes, maybe for now is not in use */}
+      {/* This way displaying for development purposes, maybe for now is not in use */}
       <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
         <div>
           <h2 className="text-lg font-bold">Working day:</h2>
@@ -190,10 +199,11 @@ date,
           <h2 className="text-lg font-bold">Current month:</h2>
           {currMonthDisplay}
         </div>
+        <div>
+          <h2 className="text-lg font-bold">Current Year:</h2>
+          {state.date.getFullYear()}
+        </div>
       </div>
     </>
   );
 }
-
-
-  
