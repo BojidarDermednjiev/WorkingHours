@@ -2,11 +2,11 @@
 
 <!-- BUGS -->
 
-[] - When working month or day is set, the app is crashing on prev month
-
+[x] - When working month or day is set, the app is crashing on prev month
+[] - For prev year is crashing the app
 <!-- Code things -->
 
-[] - Optimizing the code
+[x] - Optimizing the code
 
 <!-- Pages -->
 
