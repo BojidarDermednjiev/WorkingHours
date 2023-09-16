@@ -45,17 +45,18 @@ export default function DisplayWorkingDays({
 
         // !----- Next Month ------!
         if (
-          (state.workingData.month < month || state.workingData.year < year) &&
+          ((state.workingData.month < month && state.workingData.year <= year) ||
+            state.workingData.year < year) &&
           i == 0
         ) {
+
           /*
           Only days must be setup, and getted from last month. 
           Besides that the logic stays the same
           */
-
           // Getting prev Month data
           let prevMonth = state.displayWorkingDays[`${year}_${month - 1}`];
-          
+
           // If is next year
           if (state.workingData.year < year) {
             prevMonth = state.displayWorkingDays[`${year - 1}_11`];
