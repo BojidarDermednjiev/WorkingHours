@@ -1,7 +1,13 @@
 import React, { useMemo, useState } from "react";
 
-import { dateFormatDay, days, months } from "./data";
-import { getDaysInMonth, isObjectEmpty } from "../../utils/helpers";
+import {
+  allAreEqual,
+  dateFormatDay,
+  days,
+  getDaysInMonth,
+  isObjectEmpty,
+  months,
+} from "../../utils/helpers";
 import Day from "./Day";
 
 export default function DisplayWorkingDays({
@@ -18,7 +24,7 @@ export default function DisplayWorkingDays({
   const currMonthDisplay = months[date.getMonth() + monthIndex - 1];
   const daysInCurrentMonth = getDaysInMonth(currentYear, currMonth);
 
-  const [workingDays, setWorkingDays] = useState(2);
+  const [workingDays, setWorkingDays] = useState(3);
 
   useMemo(() => {
     try {
@@ -27,7 +33,6 @@ export default function DisplayWorkingDays({
       let skipWorkingDays = 0;
       let skipRestDays = 0;
 
-      console.log(workingDay.month, currMonthDisplay);
       for (let i = 0; i < daysInCurrentMonth.length; i++) {
         const dayDate = new Date(currentYear, currMonth - 1, i + 1).getDay();
 
@@ -46,12 +51,46 @@ export default function DisplayWorkingDays({
         }
 
         // !----- Next Month ------!
-        if (workingDay.month != currMonthDisplay) {
+        if (workingDay.month != currMonthDisplay && i == 0) {
           /*
           Only days must be setup, and getted from last month. 
           Besides that the logic stays the same
           */
-         
+
+          // Getting prev Month data
+          const prevMonth = displayWorkingDays[monthIndex - 1];
+
+          // Last two days from last month
+          const lastDays = prevMonth.days
+            .slice(-workingDays)
+            // And formating to true and false values
+            .map((day) => day.isWorking);
+
+          // Cheching if the values are all the same
+          if (allAreEqual(lastDays)) {
+            if (lastDays[0]) {
+              skipRestDays = workingDays;
+            } else {
+              skipWorkingDays = workingDays;
+            }
+            // If values are not the same
+          } else {
+            // Getting the last values types. Only this matters
+            const type = lastDays[lastDays.length - 1];
+
+            // How many times to skip
+            let skipTimes = 0;
+
+            for (let j = lastDays.length - 1; j > 0; j--) {
+              // Break if something like that happes: false, true -> this breaks on false
+              if (lastDays[j] != type) break;
+              skipTimes++;
+            }
+            // condition for not repeating myself
+            const cond = workingDays - skipTimes;
+            // And setting the loop
+            type ? (skipWorkingDays = cond) : (skipRestDays = cond);
+          }
         }
         // !----- Curr month ------!
 
@@ -60,6 +99,9 @@ export default function DisplayWorkingDays({
           arr.push(data);
 
           skipRestDays--;
+          if (workingDay.month != currMonthDisplay && skipRestDays == 0) {
+            skipWorkingDays = workingDays;
+          }
           continue;
         }
         // WorkingDays
@@ -67,15 +109,15 @@ export default function DisplayWorkingDays({
           data.isWorking = true;
           arr.push(data);
           skipWorkingDays--;
-          if (skipWorkingDays == 1) {
+          if (skipWorkingDays == 0) {
             skipRestDays = workingDays;
           }
           continue;
         }
         // If working day is set
-        if (workingDay.day <= i + 1) {
+        if (workingDay.day <= i + 1 && workingDay?.month == currMonthDisplay) {
           data.isWorking = true;
-          skipWorkingDays = workingDays;
+          skipWorkingDays = workingDays - 1;
           arr.push(data);
           // Days before the chosen day
         } else {

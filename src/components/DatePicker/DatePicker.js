@@ -4,7 +4,7 @@ import DisplayWorkingDays from "./DisplayWorkingDays";
 
 
 
-function App() {
+function DatePicker() {
   const date = new Date();
 
   const [currentYear, setCurrentYear] = useState(date.getFullYear());
@@ -46,4 +46,4 @@ function App() {
   );
 }
 
-export default App;
+export default DatePicker;
