@@ -2,18 +2,22 @@ import React from "react";
 import { months } from "../../utils/helpers";
 
 export default function Day(props) {
-  const { setWorkingDay, data, date, monthIndex } = props;
+  const {  data,dispatch, state,date } = props;
   const { day, weekOfTheDay, isWorking } = data;
   try {
     return (
       <div
-        onClick={() => {
-          setWorkingDay({
-            day: day,
-            month: months[date.getMonth() + monthIndex - 1],
-          });
-        }}
-        className={`text-center border border-r border-gray-300 ${
+        // onClick={() => {
+        //   setWorkingDay({
+        //     day: day,
+        //     month: months[date.getMonth() + monthIndex - 1],
+        //   });
+        // }}
+        onClick={() => dispatch({type: "set_working_day", payload: {
+          day,
+          month: months[date.getMonth() + state.monthIndex - 1],
+        }})}
+        className={`text-center border border-r border-gray-300 cursor-pointer hover:bg-cyan-200 ${
           weekOfTheDay == "Saturday" || weekOfTheDay == "Sunday"
             ? "bg-sky-100"
             : "bg-gray-100"

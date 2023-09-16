@@ -1,48 +1,43 @@
 import { useEffect, useState } from "react";
 import DisplayWorkingDays from "./DisplayWorkingDays";
-
-
-
+import { getDaysInMonth, months } from "../../utils/helpers";
+import useDate from "../../hooks/useDate";
 
 function DatePicker() {
-  const date = new Date();
 
-  const [currentYear, setCurrentYear] = useState(date.getFullYear());
-  const [monthIndex, setMonthIndex] = useState(1);
-  
-  const currMonth = date.getMonth() + monthIndex
 
- const [displayWorkingDays, setDisplayWorkingDays] = useState({})
- const [workingDay, setWorkingDay] = useState({
-    day: null,
-    month: null
- });
+  const [state,dispatch,date] = useDate()
 
- 
+  const currMonth = date.getMonth() + state.monthIndex;
+
 
   const changeMonth = (num) => {
-    setMonthIndex((prev) => (prev += num));
    
+    const action = {type: "change_month_index", payload: num}
+    dispatch(action);
   };
+  const currMonthDisplay = months[date.getMonth() + state.monthIndex - 1];
+  const daysInCurrentMonth = getDaysInMonth(state.currentYear, currMonth);
 
   return (
-    <div className="app">
-      
-      <DisplayWorkingDays
-       date={date}
-        monthIndex={monthIndex}
-        currMonth={currMonth}
-        currentYear={currentYear}
-        displayWorkingDays={displayWorkingDays}
-        setDisplayWorkingDays={setDisplayWorkingDays}
-        changeMonth={changeMonth}
-        workingDay={workingDay}
-        setWorkingDay={setWorkingDay}
-        
-      />
+    <DisplayWorkingDays
 
-     
-    </div>
+    state={state}
+    dispatch={dispatch}
+    date={date}
+      currMonth={currMonth}
+      
+      // Data
+      daysInCurrentMonth={daysInCurrentMonth}
+
+      // Displayers
+      currMonthDisplay={currMonthDisplay}
+
+      // Setters
+      changeMonth={changeMonth}
+    
+
+    />
   );
 }
 
