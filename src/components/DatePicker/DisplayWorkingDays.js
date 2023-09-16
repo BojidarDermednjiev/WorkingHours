@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
 import { dateFormatDay, days, months } from "./data";
 import { getDaysInMonth, isObjectEmpty } from "../../utils/helpers";
+import Day from "./Day";
 
 export default function DisplayWorkingDays({
   monthIndex,
@@ -17,87 +18,71 @@ export default function DisplayWorkingDays({
   const currMonthDisplay = months[date.getMonth() + monthIndex - 1];
   const daysInCurrentMonth = getDaysInMonth(currentYear, currMonth);
 
+  const [workingDays, setWorkingDays] = useState(2);
+
   useMemo(() => {
     try {
       const arr = [];
 
+      let skipWorkingDays = 0;
+      let skipRestDays = 0;
+
+      console.log(workingDay.month, currMonthDisplay);
       for (let i = 0; i < daysInCurrentMonth.length; i++) {
         const dayDate = new Date(currentYear, currMonth - 1, i + 1).getDay();
 
         // Setting up data for display
-
         const data = {
-          text: "",
+          isWorking: false,
           day: i + 1,
           weekOfTheDay: dateFormatDay[dayDate],
         };
-        // Prev date
-        const prevDay = arr[arr.length - 1];
 
-        // Initial Text
-        if (workingDay.day - 1 == i && currMonthDisplay == workingDay.month) {
-          data.text = "Работи";
+        // Skipping days if they are not set
+        if (!workingDay.day || !workingDay.month) {
+          data.isWorking = null;
+          arr.push(data);
+          continue;
         }
 
-        // Checking for doubles
-        if (prevDay?.text == "Работи") {
-          data.text = "Работи";
+        // !----- Next Month ------!
+        if (workingDay.month != currMonthDisplay) {
+          /*
+          Only days must be setup, and getted from last month. 
+          Besides that the logic stays the same
+          */
+         
         }
-        if (prevDay?.text == "Почива") {
-          data.text = "Почива";
-        }
+        // !----- Curr month ------!
 
-        //
-        if (arr.length == 1) {
-          if (prevDay.text == "Почива") data.text = "Почива";
-          if (prevDay.text == "Работи") data.text = "Работи";
-        }
+        // RestDays
+        if (skipRestDays > 0) {
+          arr.push(data);
 
-        // If arr gets more than two
-        if (arr.length >= 2) {
-          const prevTwo = arr.slice(-2);
-          if (prevTwo[0].text == "Работи" && prevTwo[0].text == "Работи") {
-            data.text = "Почива";
+          skipRestDays--;
+          continue;
+        }
+        // WorkingDays
+        if (skipWorkingDays > 0) {
+          data.isWorking = true;
+          arr.push(data);
+          skipWorkingDays--;
+          if (skipWorkingDays == 1) {
+            skipRestDays = workingDays;
           }
-          if (prevTwo[0].text == "Почива" && prevTwo[1].text == "Почива") {
-            data.text = "Работи";
-          }
+          continue;
         }
-
-        // If month is different than initial
-        if (!isObjectEmpty(workingDay) && arr.length < 2) {
-          if (currMonthDisplay != workingDay.month) {
-            const [befLastDay, lastDay] =
-              displayWorkingDays[monthIndex - 1]?.days?.slice(-2);
-
-            if (befLastDay.text == "Работи" && lastDay.text == "Работи") {
-              data.text = "Почива";
-            }
-            if (befLastDay.text == "Почива" && lastDay.text == "Почива") {
-              data.text = "Работи";
-            }
-            if (arr.length == 0) {
-              if (befLastDay.text == "Почива" && lastDay.text == "Работи") {
-                data.text = "Работи";
-              }
-              if (befLastDay.text == "Работи" && lastDay.text == "Почива") {
-                data.text = "Почива";
-              }
-            }
-
-            if (arr.length == 1) {
-              if (befLastDay.text == "Почива" && lastDay.text == "Работи") {
-                data.text = "Почива";
-              }
-              if (befLastDay.text == "Работи" && lastDay.text == "Почива") {
-                data.text = "Работи";
-              }
-            }
-          }
+        // If working day is set
+        if (workingDay.day <= i + 1) {
+          data.isWorking = true;
+          skipWorkingDays = workingDays;
+          arr.push(data);
+          // Days before the chosen day
+        } else {
+          data.isWorking = null;
+          arr.push(data);
+          continue;
         }
-
-        // Add data to the array
-        arr.push(data);
       }
       setDisplayWorkingDays((prev) => ({
         ...prev,
@@ -110,16 +95,12 @@ export default function DisplayWorkingDays({
     }
   }, [monthIndex, workingDay]);
 
-  if(!displayWorkingDays[monthIndex]?.days[0]){
-    return <div>Loading...</div>
+  if (!displayWorkingDays[monthIndex]?.days[0]) {
+    return <div>Loading...</div>;
   }
   const emptyDivs = Array?.apply(
     null,
-    Array(
-      days?.indexOf(
-        displayWorkingDays[monthIndex]?.days[0]?.weekOfTheDay 
-      )
-    )
+    Array(days?.indexOf(displayWorkingDays[monthIndex]?.days[0]?.weekOfTheDay))
   );
 
   return (
@@ -143,28 +124,15 @@ export default function DisplayWorkingDays({
           return <div key={index}></div>;
         })}
         {displayWorkingDays[monthIndex]?.days?.map((data) => {
-          try {
-            return (
-              <div
-                onClick={() => {
-                  setWorkingDay({
-                    day: data.day,
-                    month: months[date.getMonth() + monthIndex - 1],
-                  });
-                }}
-                className={`text-center border border-r border-gray-300 ${
-                  data.weekOfTheDay == "Saturday" || data.weekOfTheDay == "Sunday"
-                    ? "bg-sky-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <h2>{data.day}</h2>
-                <h3 className={`${data.text == "Почива" ? "text-green-500": "text-red-500"} font-bold`}>{data.text.slice(0,4)}</h3>
-              </div>
-            );
-          } catch (e) {
-            return <div>Проблем: ({e})</div>;
-          }
+          return (
+            <Day
+              key={data.day}
+              data={data}
+              date={date}
+              monthIndex={monthIndex}
+              setWorkingDay={setWorkingDay}
+            />
+          );
         })}
       </div>
       <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">

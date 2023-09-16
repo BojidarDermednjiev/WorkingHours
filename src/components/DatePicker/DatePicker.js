@@ -9,9 +9,14 @@ function App() {
 
   const [currentYear, setCurrentYear] = useState(date.getFullYear());
   const [monthIndex, setMonthIndex] = useState(1);
+  
   const currMonth = date.getMonth() + monthIndex
+
  const [displayWorkingDays, setDisplayWorkingDays] = useState({})
- const [workingDay, setWorkingDay] = useState({});
+ const [workingDay, setWorkingDay] = useState({
+    day: null,
+    month: null
+ });
 
  
 
