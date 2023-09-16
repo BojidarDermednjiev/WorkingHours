@@ -1,44 +1,40 @@
-import { useEffect, useState } from "react";
 import DisplayWorkingDays from "./DisplayWorkingDays";
+import { getDaysInMonth, months } from "../../utils/helpers";
+import useDate from "../../hooks/useDate";
 
+function DatePicker() {
+  const [state, dispatch] = useDate();
 
+  const month = state.date.getMonth();
+  
+  const changeMonth = (num) => { 
 
+    // Check if there is working day or month, no to be able to change for previous non-working month
 
-function App() {
-  const date = new Date();
-
-  const [currentYear, setCurrentYear] = useState(date.getFullYear());
-  const [monthIndex, setMonthIndex] = useState(1);
-  const currMonth = date.getMonth() + monthIndex
- const [displayWorkingDays, setDisplayWorkingDays] = useState({})
- const [workingDay, setWorkingDay] = useState({});
-
- 
-
-  const changeMonth = (num) => {
-    setMonthIndex((prev) => (prev += num));
-   
+    // Change for next year
+    
+    const action = { type: "change_month_index", payload: num };
+    dispatch(action);
   };
+  const currMonthDisplay = months[month];
+
+  const daysInCurrentMonth = getDaysInMonth(
+    state.date.getFullYear(),
+    month
+  );
 
   return (
-    <div className="app">
-      
-      <DisplayWorkingDays
-       date={date}
-        monthIndex={monthIndex}
-        currMonth={currMonth}
-        currentYear={currentYear}
-        displayWorkingDays={displayWorkingDays}
-        setDisplayWorkingDays={setDisplayWorkingDays}
-        changeMonth={changeMonth}
-        workingDay={workingDay}
-        setWorkingDay={setWorkingDay}
-        
-      />
-
-     
-    </div>
+    <DisplayWorkingDays
+      state={state}
+      dispatch={dispatch}
+      // Data
+      daysInCurrentMonth={daysInCurrentMonth}
+      // Displayers
+      currMonthDisplay={currMonthDisplay}
+      // Setters
+      changeMonth={changeMonth}
+    />
   );
 }
 
-export default App;
+export default DatePicker;

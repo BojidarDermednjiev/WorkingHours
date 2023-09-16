@@ -1,127 +1,155 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
-import { dateFormatDay, days, months } from "./data";
-import { getDaysInMonth, isObjectEmpty } from "../../utils/helpers";
+import { allAreEqual, dateFormatDay, days } from "../../utils/helpers";
+import Day from "./Day";
 
 export default function DisplayWorkingDays({
-  monthIndex,
-  currentYear,
-  currMonth,
-  displayWorkingDays,
-  setDisplayWorkingDays,
-  date,
+  state,
+  dispatch,
+  daysInCurrentMonth,
+  currMonthDisplay,
   changeMonth,
-  workingDay,
-  setWorkingDay,
 }) {
-  const currMonthDisplay = months[date.getMonth() + monthIndex - 1];
-  const daysInCurrentMonth = getDaysInMonth(currentYear, currMonth);
+  const year = state.date.getFullYear();
+  const month = state.date.getMonth();
+  const cond = `${year}_${month}`;
+  const displayData = state.displayWorkingDays[cond];
 
   useMemo(() => {
     try {
       const arr = [];
 
+      // Skipping days
+      let workingDays = 0;
+      let restDays = 0;
+
       for (let i = 0; i < daysInCurrentMonth.length; i++) {
-        const dayDate = new Date(currentYear, currMonth - 1, i + 1).getDay();
-
+        const dayDate = new Date(
+          state.date.getFullYear(),
+          month,
+          i + 1
+        ).getDay();
         // Setting up data for display
-
         const data = {
-          text: "",
+          isWorking: false,
           day: i + 1,
           weekOfTheDay: dateFormatDay[dayDate],
         };
-        // Prev date
-        const prevDay = arr[arr.length - 1];
 
-        // Initial Text
-        if (workingDay.day - 1 == i && currMonthDisplay == workingDay.month) {
-          data.text = "Работи";
+        // Skipping days if they are not set
+        if (!state.workingData.day || !state.workingData.month) {
+          data.isWorking = null;
+          arr.push(data);
+          continue;
         }
 
-        // Checking for doubles
-        if (prevDay?.text == "Работи") {
-          data.text = "Работи";
-        }
-        if (prevDay?.text == "Почива") {
-          data.text = "Почива";
-        }
+        // !----- Next Month ------!
+        if (
+          ((state.workingData.month < month && state.workingData.year <= year) ||
+            state.workingData.year < year) &&
+          i == 0
+        ) {
 
-        //
-        if (arr.length == 1) {
-          if (prevDay.text == "Почива") data.text = "Почива";
-          if (prevDay.text == "Работи") data.text = "Работи";
-        }
+          /*
+          Only days must be setup, and getted from last month. 
+          Besides that the logic stays the same
+          */
+          // Getting prev Month data
+          let prevMonth = state.displayWorkingDays[`${year}_${month - 1}`];
 
-        // If arr gets more than two
-        if (arr.length >= 2) {
-          const prevTwo = arr.slice(-2);
-          if (prevTwo[0].text == "Работи" && prevTwo[0].text == "Работи") {
-            data.text = "Почива";
+          // If is next year
+          if (state.workingData.year < year) {
+            prevMonth = state.displayWorkingDays[`${year - 1}_11`];
           }
-          if (prevTwo[0].text == "Почива" && prevTwo[1].text == "Почива") {
-            data.text = "Работи";
-          }
-        }
+          // Last two days from last month
+          const lastDays = prevMonth.days
+            .slice(-state.perWorkDays)
+            // And formating to true and false values
+            .map((day) => day.isWorking);
 
-        // If month is different than initial
-        if (!isObjectEmpty(workingDay) && arr.length < 2) {
-          if (currMonthDisplay != workingDay.month) {
-            const [befLastDay, lastDay] =
-              displayWorkingDays[monthIndex - 1]?.days?.slice(-2);
+          // Cheching if the values are all the same
+          if (allAreEqual(lastDays)) {
+            if (lastDays[0]) {
+              restDays = state.perWorkDays;
+            } else {
+              workingDays = state.perWorkDays;
+            }
+            // If values are not the same
+          } else {
+            // Getting the last values types. Only this matters
+            const type = lastDays[lastDays.length - 1];
 
-            if (befLastDay.text == "Работи" && lastDay.text == "Работи") {
-              data.text = "Почива";
-            }
-            if (befLastDay.text == "Почива" && lastDay.text == "Почива") {
-              data.text = "Работи";
-            }
-            if (arr.length == 0) {
-              if (befLastDay.text == "Почива" && lastDay.text == "Работи") {
-                data.text = "Работи";
-              }
-              if (befLastDay.text == "Работи" && lastDay.text == "Почива") {
-                data.text = "Почива";
-              }
-            }
+            // How many times to skip
+            let skipTimes = 0;
 
-            if (arr.length == 1) {
-              if (befLastDay.text == "Почива" && lastDay.text == "Работи") {
-                data.text = "Почива";
-              }
-              if (befLastDay.text == "Работи" && lastDay.text == "Почива") {
-                data.text = "Работи";
-              }
+            for (let j = lastDays.length - 1; j > 0; j--) {
+              // Break if something like that happes: false, true -> this breaks on false
+              if (lastDays[j] != type) break;
+              skipTimes++;
             }
+            // condition for not repeating myself
+            const cond = state.perWorkDays - skipTimes;
+            // And setting the loop
+            type ? (workingDays = cond) : (restDays = cond);
           }
         }
+        // !----- Curr month ------!
 
-        // Add data to the array
-        arr.push(data);
+        // RestDays
+        if (restDays > 0) {
+          arr.push(data);
+
+          restDays--;
+          if (state.workingData.month != currMonthDisplay && restDays == 0) {
+            workingDays = state.perWorkDays;
+          }
+          continue;
+        }
+        // WorkingDays
+        if (workingDays > 0) {
+          data.isWorking = true;
+          arr.push(data);
+          workingDays--;
+          if (workingDays == 0) {
+            restDays = state.perWorkDays;
+          }
+          continue;
+        }
+        // If working day is set
+        if (
+          state.workingData.day <= i + 1 &&
+          state.workingData?.month == month
+        ) {
+          data.isWorking = true;
+          workingDays = state.perWorkDays - 1;
+          arr.push(data);
+          // Days before the chosen day
+        } else {
+          data.isWorking = null;
+          arr.push(data);
+          continue;
+        }
       }
-      setDisplayWorkingDays((prev) => ({
-        ...prev,
-        [monthIndex]: {
-          days: arr,
-        },
-      }));
+
+      // This must be dispatch
+      const action = {
+        type: "add_working_days",
+        payload: arr,
+      };
+      dispatch(action);
     } catch (e) {
       console.log(e);
     }
-  }, [monthIndex, workingDay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.workingData, state.date]);
 
-  if(!displayWorkingDays[monthIndex]?.days[0]){
-    return <div>Loading...</div>
+  if (!displayData?.days[0]) {
+    return <div>Loading...</div>;
   }
   const emptyDivs = Array?.apply(
     null,
-    Array(
-      days?.indexOf(
-        displayWorkingDays[monthIndex]?.days[0]?.weekOfTheDay 
-      )
-    )
+    Array(days?.indexOf(displayData?.days[0]?.weekOfTheDay))
   );
-
   return (
     <>
       <div className="flex items-center justify-between mx-5 mt-10">
@@ -139,47 +167,42 @@ export default function DisplayWorkingDays({
             </div>
           );
         })}
+
+        {/* Creating empty divs from last month, to properly display the days */}
         {emptyDivs?.map((emptyDiv, index) => {
           return <div key={index}></div>;
         })}
-        {displayWorkingDays[monthIndex]?.days?.map((data) => {
-          try {
-            return (
-              <div
-                onClick={() => {
-                  setWorkingDay({
-                    day: data.day,
-                    month: months[date.getMonth() + monthIndex - 1],
-                  });
-                }}
-                className={`text-center border border-r border-gray-300 ${
-                  data.weekOfTheDay == "Saturday" || data.weekOfTheDay == "Sunday"
-                    ? "bg-sky-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <h2>{data.day}</h2>
-                <h3 className={`${data.text == "Почива" ? "text-green-500": "text-red-500"} font-bold`}>{data.text.slice(0,4)}</h3>
-              </div>
-            );
-          } catch (e) {
-            return <div>Проблем: ({e})</div>;
-          }
+        {displayData?.days?.map((data) => {
+          return (
+            <Day
+              key={data.day}
+              data={data}
+              state={state}
+              currMonth={month}
+              monthIndex={state.monthIndex}
+              dispatch={dispatch}
+            />
+          );
         })}
       </div>
+
+      {/* This way displaying for development purposes, maybe for now is not in use */}
       <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
         <div>
           <h2 className="text-lg font-bold">Working day:</h2>
-          {workingDay.day}
+          {state.workingData.day}
         </div>
         <div>
           <h2 className="text-lg font-bold">Working Month:</h2>
-          {workingDay.month}
+          {state.workingData.month}
         </div>
         <div>
           <h2 className="text-lg font-bold">Current month:</h2>
-          {/* date.getMonth() + monthIndex */}
           {currMonthDisplay}
+        </div>
+        <div>
+          <h2 className="text-lg font-bold">Current Year:</h2>
+          {state.date.getFullYear()}
         </div>
       </div>
     </>
