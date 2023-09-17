@@ -4,7 +4,7 @@ import { allAreEqual, dateFormatDay, days } from "../../utils/helpers";
 import Day from "./Day";
 import Navigation from "./Navigation";
 import ChangeMonth from "./ChangeMonth";
-
+import Settings from "./Settings";
 
 export default function DisplayWorkingDays({
   state,
@@ -144,7 +144,7 @@ export default function DisplayWorkingDays({
       console.log(e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.workingData, state.date]);
+  }, [state.workingData, state.date, state.perWorkDays]);
 
   if (!displayData?.days[0]) {
     return <div>Loading...</div>;
@@ -154,53 +154,44 @@ export default function DisplayWorkingDays({
     Array(days?.indexOf(displayData?.days[0]?.weekOfTheDay))
   );
   return (
-    <section className="bg-[#c5e9ff] container rounded-xl px-14 py-6 text-white mt-10 shadow-xl relative">
-      <Navigation year={state.date.getFullYear()} currMonthDisplay={currMonthDisplay} changeMonth={changeMonth}/>
-     
-      <div className="grid grid-cols-7 gap-3 mt-5 grid-rows-8">
-        {days.map((day) => {
-          return (
-            <div
-              key={day}
-              className="flex items-center justify-center rounded-md font-semibold bg-[hsl(201,68%,61%)]"
-            >
-              {day.slice(0, 1)}
-            </div>
-          );
-        })}
-
-        {/* Creating empty divs from last month, to properly display the days */}
-        {emptyDivs?.map((emptyDiv, index) => {
-          return <div key={index}></div>;
-        })}
-        {displayData?.days?.map((data) => {
-          return (
-            <Day
-              key={data.day}
-              data={data}
-              state={state}
-              currMonth={month}
-              monthIndex={state.monthIndex}
-              dispatch={dispatch}
-            />
-          );
-        })}
-      </div>
-      <ChangeMonth changeMonth={changeMonth}/>
-      
-    </section>
+    <>
+      <Settings state={state} dispatch={dispatch}/>
+      <section className="bg-[#c5e9ff] container rounded-xl px-14 py-6 text-white mt-10 shadow-xl relative">
+        <Navigation
+          year={state.date.getFullYear()}
+          currMonthDisplay={currMonthDisplay}
+          changeMonth={changeMonth}
+        />
+        <div className="grid grid-cols-7 gap-3 mt-5 grid-rows-8">
+          {days.map((day) => {
+            return (
+              <div
+                key={day}
+                className="flex items-center justify-center rounded-md font-semibold bg-[hsl(201,68%,61%)]"
+              >
+                {day.slice(0, 1)}
+              </div>
+            );
+          })}
+          {/* Creating empty divs from last month, to properly display the days */}
+          {emptyDivs?.map((emptyDiv, index) => {
+            return <div key={index}></div>;
+          })}
+          {displayData?.days?.map((data) => {
+            return (
+              <Day
+                key={data.day}
+                data={data}
+                state={state}
+                currMonth={month}
+                monthIndex={state.monthIndex}
+                dispatch={dispatch}
+              />
+            );
+          })}
+        </div>
+        <ChangeMonth changeMonth={changeMonth} />
+      </section>
+    </>
   );
 }
-
-
-{/* This way displaying for development purposes, maybe for now is not in use */}
-{/* <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
-<div>
-  <h2 className="text-lg font-bold">Working day:</h2>
-  {state.workingData.day}
-</div>
-<div>
-  <h2 className="text-lg font-bold">Working Month:</h2>
-  {state.workingData.month}
-</div>
-</div> */}
