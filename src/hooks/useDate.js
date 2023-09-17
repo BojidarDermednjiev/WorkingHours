@@ -2,6 +2,11 @@ import React, { useEffect, useReducer } from "react";
 
 function reducer(state, action) {
   switch (action.type) {
+    case "change_per_work_days":
+      return {
+        ...state,
+        perWorkDays: state.perWorkDays + action.payload,
+      };
     case "change_month_index":
       const newDate = new Date(state.date);
       newDate.setMonth(newDate.getMonth() + action.payload);
@@ -13,7 +18,7 @@ function reducer(state, action) {
     case "add_working_days":
       const year = state.date.getFullYear();
       const month = state.date.getMonth();
-      const cond =  `${year}_${month}`;
+      const cond = `${year}_${month}`;
 
       return {
         ...state,
@@ -41,7 +46,7 @@ function reducer(state, action) {
 export default function useDate() {
   const [state, dispatch] = useReducer(reducer, {
     date: new Date(),
-    perWorkDays: 2,
+    perWorkDays: 3,
     displayWorkingDays: {},
     workingData: {
       day: null,
