@@ -2,6 +2,9 @@ import React, { useMemo, useState } from "react";
 
 import { allAreEqual, dateFormatDay, days } from "../../utils/helpers";
 import Day from "./Day";
+import Navigation from "./Navigation";
+import ChangeMonth from "./ChangeMonth";
+
 
 export default function DisplayWorkingDays({
   state,
@@ -45,11 +48,11 @@ export default function DisplayWorkingDays({
 
         // !----- Next Month ------!
         if (
-          ((state.workingData.month < month && state.workingData.year <= year) ||
+          ((state.workingData.month < month &&
+            state.workingData.year <= year) ||
             state.workingData.year < year) &&
           i == 0
         ) {
-
           /*
           Only days must be setup, and getted from last month. 
           Besides that the logic stays the same
@@ -151,17 +154,15 @@ export default function DisplayWorkingDays({
     Array(days?.indexOf(displayData?.days[0]?.weekOfTheDay))
   );
   return (
-    <>
-      <div className="flex items-center justify-between mx-5 mt-10">
-        <div onClick={() => changeMonth(-1)}>Предишен месец</div>
-        <div onClick={() => changeMonth(1)}>Следващ месец</div>
-      </div>
-      <div className="grid grid-cols-7 mt-5">
+    <section className="bg-[#c5e9ff] container rounded-xl px-14 py-6 text-white mt-10 shadow-xl relative">
+      <Navigation year={state.date.getFullYear()} currMonthDisplay={currMonthDisplay} changeMonth={changeMonth}/>
+     
+      <div className="grid grid-cols-7 gap-3 mt-5 grid-rows-8">
         {days.map((day) => {
           return (
             <div
               key={day}
-              className="flex items-center justify-center text-lg font-semibold border-r border-y border-slate-500"
+              className="flex items-center justify-center rounded-md font-semibold bg-[hsl(201,68%,61%)]"
             >
               {day.slice(0, 1)}
             </div>
@@ -185,26 +186,21 @@ export default function DisplayWorkingDays({
           );
         })}
       </div>
-
-      {/* This way displaying for development purposes, maybe for now is not in use */}
-      <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
-        <div>
-          <h2 className="text-lg font-bold">Working day:</h2>
-          {state.workingData.day}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Working Month:</h2>
-          {state.workingData.month}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Current month:</h2>
-          {currMonthDisplay}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Current Year:</h2>
-          {state.date.getFullYear()}
-        </div>
-      </div>
-    </>
+      <ChangeMonth changeMonth={changeMonth}/>
+      
+    </section>
   );
 }
+
+
+{/* This way displaying for development purposes, maybe for now is not in use */}
+{/* <div className="flex flex-col mt-10 lg:flex-row gap-x-10 gap-y-4">
+<div>
+  <h2 className="text-lg font-bold">Working day:</h2>
+  {state.workingData.day}
+</div>
+<div>
+  <h2 className="text-lg font-bold">Working Month:</h2>
+  {state.workingData.month}
+</div>
+</div> */}

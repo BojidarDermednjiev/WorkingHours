@@ -1,6 +1,12 @@
-import DisplayWorkingDays from "./DisplayWorkingDays";
+
+
+// Utils
 import { getDaysInMonth, months } from "../../utils/helpers";
+// Hooks
 import useDate from "../../hooks/useDate";
+// Components
+import DisplayWorkingDays from "../DatePicker/DisplayWorkingDays";
+
 
 function DatePicker() {
   const [state, dispatch] = useDate();

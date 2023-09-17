@@ -1,16 +1,10 @@
-
-
-// Components
-import DatePicker from "./components/DatePicker/DatePicker"
-
+import { BrowserRouter as Router } from "react-router-dom";
+import Routers from "./components/Router/Router";
 function App() {
-
   return (
-    
-    <>
-      <DatePicker />
-
-    </>
+    <Router>
+      <Routers />
+    </Router>
   );
 }
 
