@@ -4,6 +4,7 @@
 
 [x] - When working month or day is set, the app is crashing on prev month
 [x] - For prev year is crashing the app
+[] - Calendar is not working when is 1 by 1
 <!-- Code things -->
 
 [x] - Optimizing the code
