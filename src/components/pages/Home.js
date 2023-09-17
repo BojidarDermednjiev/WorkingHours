@@ -3,6 +3,7 @@ import React from "react";
 // Components
 import GoogleInput from "../Generic/Inputs/GoogleInput";
 import { Button } from "@material-tailwind/react";
+import CalendarImg from "../../assets/Calendar-bro.svg"
 
 export default function Home() {
   return (
@@ -12,7 +13,7 @@ export default function Home() {
           {/* <!-- Left column container with background--> */}
           <div class="mb-12 md:mb-0 md:w-8/12 lg:w-6/12">
             <img
-              src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+              src={CalendarImg}
               class="w-full"
               alt=" This is the phone"
             />
