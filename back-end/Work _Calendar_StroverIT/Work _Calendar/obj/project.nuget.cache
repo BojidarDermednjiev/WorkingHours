@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "ySbkpe9OrW4xS8XXbGr8XG1Gy3JOAxq2mLkaPOrvpid/yTqAYwPQRTFPCRVgql8uYs9QMTYhh3JwQ2Wf4L366g==",
+  "success": true,
+  "projectFilePath": "C:\\Education\\WorkingHours\\back-end\\Work _Calendar_StroverIT\\Work _Calendar\\Work _Calendar.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\bozhi\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.19.4\\microsoft.visualstudio.azure.containers.tools.targets.1.19.4.nupkg.sha512"
+  ],
+  "logs": []
+}
